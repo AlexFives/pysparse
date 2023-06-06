@@ -1,0 +1,5 @@
+cmake-build-debug
+*.cpython*
+.DS_Store
+.idea
+__pycache__
