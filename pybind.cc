@@ -13,14 +13,14 @@ typedef PySparseMatrix<index_type, long double> SpM_long_double;
 
 template<typename IteratorT>
 void make_shape_iterator(py::module_ &handle, const char *name) {
-    std::string class_name = std::string(name) + "ShapeIterator";
+    std::string class_name = "ShapeIterator";
     py::class_<IteratorT>(handle, class_name.c_str())
             .def("__next__", &IteratorT::__next__);
 }
 
 template<typename ShapeT>
 void make_shape(py::module_ &handle, const char *name) {
-    std::string class_name = std::string(name) + "Shape";
+    std::string class_name = "Shape";
     py::class_<ShapeT>(handle, class_name.c_str())
             .def("__eq__", &ShapeT::__eq__, py::arg("other"))
             .def("__ne__", &ShapeT::__ne__, py::arg("other"))
@@ -69,12 +69,8 @@ void make_sparse_matrix(py::module_ &handle, const char *name) {
 template<typename SpM>
 void make_type(py::module_ &handle, const char *name) {
     using iterator = typename SpM::iterator;
-    using shape = typename SpM::shape_type;
     using view = typename SpM::view_type;
-    using shape_iterator = typename shape::iterator;
 
-    make_shape_iterator<shape_iterator>(handle, name);
-    make_shape<shape>(handle, name);
     make_view<view>(handle, name);
     make_sparse_matrix_iterator<iterator>(handle, name);
     make_sparse_matrix<SpM>(handle, name);
@@ -83,9 +79,12 @@ void make_type(py::module_ &handle, const char *name) {
 PYBIND11_MODULE(pysparse, handle) {
     py::register_exception<ViewCastError>(handle, "ViewCastError");
 
-//    make_type<SpM_int32>(handle, "Int32SparseMatrix");
+    make_shape<typename SpM_double::shape_type>(handle, "Shape");
+    make_shape_iterator<typename SpM_double::shape_type::iterator>(handle, "ShapeIterator");
+
+    make_type<SpM_int32>(handle, "Int32SparseMatrix");
     make_type<SpM_int64>(handle, "Int64SparseMatrix");
-//    make_type<SpM_float>(handle, "FloatSparseMatrix");
-//    make_type<SpM_double>(handle, "DoubleSparseMatrix");
-//    make_type<SpM_long_double>(handle, "LongDoubleSparseMatrix");
+    make_type<SpM_float>(handle, "FloatSparseMatrix");
+    make_type<SpM_double>(handle, "DoubleSparseMatrix");
+    make_type<SpM_long_double>(handle, "LongDoubleSparseMatrix");
 }
